@@ -16,22 +16,33 @@ col += yyleng; \
 
 %}
 
+IDENT	[a-zA-Z][a-zA-Z0-9]*
+OP	[+\-*/%]
+
 %%
 
-[a-zA-Z][a-zA-Z0-9]*	{ printf("%s", yytext); return IDENTIFIER;}
-[ \t]+ 			{ printf("%s", yytext); }
-\n 			{ col = 0;  printf("%s", yytext); return '\n';}
-[+\-*/%]		{ printf("%s", yytext); return OP;}
-=			{ printf("%s", yytext); return EQUAL;}
-"("			{ printf("%s", yytext); return OPEN;}
-")"			{ printf("%s", yytext); return CLOSE;}
-/* [(][a-zA-Z][a-zA-Z0-9]*	{ printf("%s", yytext); return SUBEXSTART;} */
-/* [a-zA-Z][a-zA-Z0-9]*[)]	{ printf("%s", yytext); return SUBEXEND;} */
-[;]			{ printf("%s", yytext); return ';';}
-[^[:space:]]+		{
-    			fprintf(stderr, "Invalid token '%s' at line %d\n", yytext, yylineno);
-    			return ERROR;
-			}
-%%
+	/* valid tokens */
+{IDENT}		{ printf("%s", yytext); return IDENTIFIER;}
+[ \t]+ 		{ printf("%s", yytext); }
+\n 		{ col = 0;  printf("%s", yytext); return '\n';}
+{OP}		{ printf("%s", yytext); return OP;}
+=		{ printf("%s", yytext); return EQUAL;}
+"("		{ printf("%s", yytext); return OPEN;}
+")"		{ printf("%s", yytext); return CLOSE;}
+[;]		{ printf("%s", yytext); return ';';}
 
-test
+	/* error catching */
+[0-9]{IDENT}				{
+    					fprintf(stderr, "Invalid token '%s' at line %d\n", yytext, yylineno);
+    					return ERROR;
+					}
+{OP}{2,}				{
+    					fprintf(stderr, "Invalid token '%s' at line %d\n", yytext, yylineno);
+    					return ERROR;
+					}
+[^[:space:][:alnum:]\(\)+\-*/%=;]+	{
+    					fprintf(stderr, "Invalid token '%s' at line %d\n", yytext, yylineno);
+    					return ERROR;
+					}
+
+%%

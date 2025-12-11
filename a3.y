@@ -53,96 +53,8 @@ assignment_invalid:
 	;
 
 expression:
-	expressionstart expressionextension
-	;
-
-expressionstart:
-	expressionstart_valid |
-	expressionstart_invalid
-	;
-
-expressionstart_valid:
-	IDENTIFIER OP element |
+	element OP element |
 	subexpression
-	;
-
-expressionstart_invalid:
-	OP				{ Error("Expression cannot start with OP"); YYERROR;} |
-	closesubexpression		{ Error("Expression cannot start by closing subexpression"); YYERROR;} |
-	'\n'				{ Error("Expression cannot be empty"); YYERROR;} |
-	';'				{ Error("Expression cannot start with ';'"); YYERROR; } |
-	IDENTIFIER IDENTIFIER		{ Error("Terms must be separated by OP"); YYERROR;} |
-	IDENTIFIER opensubexpression	{ Error("Terms must be separated by OP"); YYERROR;} |
-	IDENTIFIER '\n'			{ Error("Expression cannot be single identifier"); YYERROR; } |
-	IDENTIFIER closesubexpression	{ Error("Mismatched parentheses"); YYERROR; } |
-	IDENTIFIER ';'			{ Error("Expression cannot only have one term"); YYERROR; }
-	;
-
-expressionextension:
-	%empty |
-	expressionextension_valid |
-	expressionextension_invalid
-	;
-
-expressionextension_valid:
-	OP element expressionextension
-	;
-
-expressionextension_invalid:
-	IDENTIFIER		{ Error("Element IDENTIFIER invalid"); YYERROR;} |
-	EQUAL			{ Error("Invalid assignment"); YYERROR;} |
-	opensubexpression	{ Error("Terms must be separated by OP"); YYERROR; } |
-	closesubexpression	{ Error("Terms must be separated by OP"); YYERROR; }
-	;
-
-subexpressionextension:
-	subexpressionextension_valid |
-	subexpressionextension_invalid
-	;
-
-subexpressionextension_valid:
-	subexpressionend |
-	element OP subexpressionextension
-	;
-
-subexpressionextension_invalid:
-	element IDENTIFIER
-	;
-
-subexpression:
-	subexpression_valid |
-	subexpression_invalid
-	;
-
-subexpression_valid:
-	subexpressionstart OP subexpressionextension 
-	;
-
-subexpression_invalid:
-	subexpressionstart IDENTIFIER		{ Error("Terms must be separated by OP"); YYERROR; } |
-	subexpressionstart EQUAL		{ Error("Invalid assignment"); YYERROR; } |
-	subexpressionstart opensubexpression	{ Error("Terms must be separated by OP"); YYERROR; } |
-	subexpressionstart closesubexpression	{ Error("Terms must be separated by OP"); YYERROR; }
-	;
-
-subexpressionstart:
-	OPEN  element | // double parentheses not allowed because '(' must be preceded by space '((' illegal '( (' allowed
-	SUBEXSTART
-	;
-
-subexpressionend:
-	element CLOSE |
-	SUBEXEND
-	;
-
-opensubexpression: //used for error checking purposes
-	OPEN |
-	SUBEXEND
-	;
-
-closesubexpression: //used for error checking purposes
-	CLOSE |
-	SUBEXEND
 	;
 
 element:
@@ -158,6 +70,10 @@ element_valid:
 element_invalid:
 	OP	{ Error("OP OP invalid"); YYERROR;} |
 	EQUAL	{ Error("Invalid assignment"); YYERROR;}
+	;
+
+subexpression:
+	OPEN expression CLOSE
 	;
 
 %%
