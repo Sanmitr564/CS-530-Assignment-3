@@ -33,3 +33,5 @@ col += yyleng; \
     			return ERROR;
 			}
 %%
+
+test
